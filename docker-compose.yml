@@ -5,9 +5,6 @@ services:
     image: redis
     container_name: hltv-redis
     ports:
-      - "6379:6379"
+      - "6378:6379"
     volumes:
-      - skyg0d_data:/var/lib/redis/data
-
-volumes:
-  skyg0d_data:
+      - ./data:/var/lib/redis/data

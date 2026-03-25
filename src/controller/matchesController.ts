@@ -18,4 +18,13 @@ router.get('/info/:matchId', async (req, res) => {
   });
 });
 
+router.get('/', async (req, res) => {
+  cacheRoute({
+    res,
+    key: "matches",
+    field: "matches/list",
+    fetchData: async () => Scraper.getMatches(),
+  });
+});
+
 export default router;

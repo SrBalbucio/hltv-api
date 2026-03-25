@@ -11,6 +11,10 @@
       "description": "Local Server API"
     },
     {
+      "url": "http://localhost:25568/api/v1",
+      "description": "Env Server API"
+    },
+    {
       "url": "https://hltv-api.onrender.com/api/v1",
       "description": "Production Server API"
     }
@@ -23,12 +27,18 @@
     {
       "name": "Teams",
       "description": "Teams routes"
+    },
+    {
+      "name": "Events",
+      "description": "Events routes"
     }
   ],
   "paths": {
     "/search": {
       "get": {
-        "tags": ["General"],
+        "tags": [
+          "General"
+        ],
         "summary": "General search in HLTV",
         "parameters": [
           {
@@ -60,7 +70,9 @@
     },
     "/ranking/{year}/{month}/{day}/{country}": {
       "get": {
-        "tags": ["General"],
+        "tags": [
+          "General"
+        ],
         "summary": "Ranking of bests",
         "parameters": [
           {
@@ -111,7 +123,9 @@
     },
     "/team/info/{teamId}": {
       "get": {
-        "tags": ["Teams"],
+        "tags": [
+          "Teams"
+        ],
         "summary": "Info of team",
         "parameters": [
           {
@@ -138,7 +152,9 @@
     },
     "/team/search/{teamName}": {
       "get": {
-        "tags": ["Teams"],
+        "tags": [
+          "Teams"
+        ],
         "summary": "Search a team",
         "parameters": [
           {
@@ -165,7 +181,9 @@
     },
     "/team/matches/{teamId}": {
       "get": {
-        "tags": ["Teams"],
+        "tags": [
+          "Teams"
+        ],
         "summary": "Team matches",
         "parameters": [
           {
@@ -192,7 +210,9 @@
     },
     "/match/info/{matchId}": {
       "get": {
-        "tags": ["Matches"],
+        "tags": [
+          "Matches"
+        ],
         "summary": "Info of match",
         "parameters": [
           {
@@ -252,6 +272,49 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/match": {
+      "get": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Get live and upcoming matches",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Matches"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/event": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Get ongoing events",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventItem"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -588,28 +651,22 @@
             "type": "array",
             "items": {
               "type": "object",
-
               "properties": {
                 "name": {
                   "type": "string"
                 },
-
                 "logo": {
                   "type": "string"
                 },
-
                 "url": {
                   "type": "string"
                 },
-
                 "win": {
                   "type": "boolean"
                 },
-
                 "score": {
                   "type": "integer"
                 },
-
                 "nationality": {
                   "type": "object",
                   "properties": {
@@ -624,28 +681,23 @@
               }
             }
           },
-
           "date": {
             "type": "string"
           },
-
           "match_over": {
             "type": "boolean"
           },
-
           "event": {
             "type": "object",
             "properties": {
               "name": {
                 "type": "string"
               },
-
               "link": {
                 "type": "string"
               }
             }
           },
-
           "picks": {
             "type": "object",
             "properties": {
@@ -658,7 +710,6 @@
                   }
                 }
               },
-
               "maps": {
                 "type": "array",
                 "items": {
@@ -667,11 +718,9 @@
                     "name": {
                       "type": "string"
                     },
-
                     "image": {
                       "type": "string"
                     },
-
                     "stats_link": {
                       "type": "string",
                       "nullable": true
@@ -681,7 +730,76 @@
               }
             }
           }
-
+        }
+      },
+      "Matches": {
+        "type": "object",
+        "properties": {
+          "live": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchItem"
+            }
+          },
+          "upcoming": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchItem"
+            }
+          }
+        }
+      },
+      "MatchItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "live": {
+            "type": "boolean"
+          },
+          "team1": {
+            "type": "string"
+          },
+          "team2": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "stars": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "EventItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string"
+          }
         }
       }
     }

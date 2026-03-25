@@ -6,6 +6,7 @@ import teamsController from "./controller/teamsController";
 import matchesController from "./controller/matchesController";
 import playersController from "./controller/playersController";
 import utilsController from "./controller/utilsController";
+import eventsController from "./controller/eventsController";
 
 import { PORT } from "./service/env";
 import { redisClient } from "./service/redis";
@@ -34,6 +35,7 @@ app.use("/api/v1", indexController);
 app.use("/api/v1/team", teamsController);
 app.use("/api/v1/match", matchesController);
 app.use("/api/v1/player", playersController);
+app.use("/api/v1/event", eventsController);
 app.use("/api/v1/util", utilsController);
 
 app.listen(PORT, async () => {
