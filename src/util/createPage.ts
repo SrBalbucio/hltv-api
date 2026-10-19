@@ -16,7 +16,7 @@ export async function createPage(): Promise<CreatePageReturn> {
 
   page.on("request", (request) => {
     if (
-      ["image", "stylesheet", "font", "script"].indexOf(
+      ["image", "stylesheet", "font"].indexOf(
         request.resourceType()
       ) !== -1
     ) {

@@ -2,6 +2,7 @@ import { getTeamInfo } from './getTeamInfo';
 import { getPlayerInfo } from './getPlayerInfo';
 import { getTeamMatches } from './getTeamMatches';
 import { getMatchInfo } from './getMatchInfo';
+import { getMatchScore } from './getMatchScore';
 import { getRankingInfo } from './getRankingInfo';
 import { search } from './search';
 import { getMatches } from './getMatches';
@@ -15,6 +16,7 @@ export const Scraper = {
   getTeamInfo,
   getTeamMatches,
   getMatchInfo,
+  getMatchScore,
   getRankingInfo,
   search,
   getPlayerInfo,
