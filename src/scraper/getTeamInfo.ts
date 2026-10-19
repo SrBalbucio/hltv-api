@@ -3,159 +3,162 @@ import { HLTV_URL } from ".";
 import { assertNotChallenged, createPage } from "../util/createPage";
 
 export async function getTeamInfo(teamId: string) {
-  const [page, browser] = await createPage();
+  const [page] = await createPage();
 
-  await page.goto(`https://www.hltv.org/team/${teamId}/team`, {
-    waitUntil: "domcontentloaded",
-    timeout: 0,
-  });
+  try {
 
-  await assertNotChallenged(page);
+    await page.goto(`https://www.hltv.org/team/${teamId}/team`, {
+      waitUntil: "domcontentloaded",
+      timeout: 0,
+    });
 
-  const info = await page.evaluate((hltvURL) => {
-    const mappers = {
-      world_ranking: (value: string) => parseInt(value.replace("#", "")),
-      weeks_in_top30_for_core: parseInt,
-      average_player_age: Number,
-    };
+    await assertNotChallenged(page);
 
-    function getElementText(
-      selector: string,
-      parent: Element | Document = document
-    ) {
-      return parent.querySelector(selector)?.textContent.trim();
-    }
+    const info = await page.evaluate((hltvURL) => {
+      const mappers = {
+        world_ranking: (value: string) => parseInt(value.replace("#", "")),
+        weeks_in_top30_for_core: parseInt,
+        average_player_age: Number,
+      };
 
-    function getTeamStats() {
-      const elements = [...document.querySelectorAll(".profile-team-stat")];
+      function getElementText(
+        selector: string,
+        parent: Element | Document = document
+      ) {
+        return parent.querySelector(selector)?.textContent.trim();
+      }
 
-      return elements.reduce((stats, element) => {
-        const name = getElementText("b", element)
-          .toLowerCase()
-          .replaceAll(" ", "_");
+      function getTeamStats() {
+        const elements = [...document.querySelectorAll(".profile-team-stat")];
 
-        const isLink = element.querySelector("a");
+        return elements.reduce((stats, element) => {
+          const name = getElementText("b", element)
+            .toLowerCase()
+            .replaceAll(" ", "_");
 
-        const rawValue = getElementText(isLink ? "a" : "span", element);
-        const mapper = mappers[name];
-        const value = mapper ? mapper(rawValue) : rawValue;
+          const isLink = element.querySelector("a");
 
-        return {
-          ...stats,
-          [name]: value,
-        };
-      }, {});
-    }
-
-    function getPlayers() {
-      return [...document.querySelectorAll(".bodyshot-team-bg a")].map(
-        (link) => {
-          const image = link.querySelector("img");
-          const nationality = link.querySelector("img.flag");
-
-          const flagSrc = nationality.getAttribute("src");
-
-          const flag = flagSrc.startsWith("http") ? flagSrc : hltvURL + flagSrc;
+          const rawValue = getElementText(isLink ? "a" : "span", element);
+          const mapper = mappers[name];
+          const value = mapper ? mapper(rawValue) : rawValue;
 
           return {
-            url: link.getAttribute("href"),
-            nick: link.getAttribute("title"),
-            full_name: image.getAttribute("title"),
-
-            nationality: {
-              country: nationality.getAttribute("title"),
-              flag,
-            },
-
-            image: {
-              src: image.getAttribute("src"),
-              alt: image.getAttribute("alt"),
-            },
+            ...stats,
+            [name]: value,
           };
-        }
-      );
-    }
+        }, {});
+      }
 
-    function getNextMatch() {
-      const [, enemy] = document.querySelectorAll(
-        ".streak-next-match-image-ASdvuasdr123Gazx"
-      );
+      function getPlayers() {
+        return [...document.querySelectorAll(".bodyshot-team-bg a")].map(
+          (link) => {
+            const image = link.querySelector("img");
+            const nationality = link.querySelector("img.flag");
 
-      return {
-        name: enemy.getAttribute("alt"),
-        logo: enemy.getAttribute("src"),
-      };
-    }
+            const flagSrc = nationality.getAttribute("src");
 
-    function getCurrentForm() {
-      return [...document.querySelectorAll(".streak-ASdvuasdr123Gazx")]
-        .map((match) => ({
-          won: match.classList.contains("won"),
-        }))
-        .reverse();
-    }
+            const flag = flagSrc.startsWith("http") ? flagSrc : hltvURL + flagSrc;
 
-    function getTrophies() {
-      return [...document.querySelectorAll("a.trophy")].map((link) => {
-        const trophy = link.querySelector(".trophyDescription");
+            return {
+              url: link.getAttribute("href"),
+              nick: link.getAttribute("title"),
+              full_name: image.getAttribute("title"),
 
-        const name = trophy.getAttribute("title");
-        const url = link.getAttribute("href");
-        const imageURL = trophy.querySelector("img").getAttribute("src");
+              nationality: {
+                country: nationality.getAttribute("title"),
+                flag,
+              },
 
-        const image = imageURL.startsWith("http")
-          ? imageURL
-          : "https://www.hltv.org" + imageURL;
+              image: {
+                src: image.getAttribute("src"),
+                alt: image.getAttribute("alt"),
+              },
+            };
+          }
+        );
+      }
+
+      function getNextMatch() {
+        const [, enemy] = document.querySelectorAll(
+          ".streak-next-match-image-ASdvuasdr123Gazx"
+        );
 
         return {
-          name,
-          url,
-          image,
+          name: enemy.getAttribute("alt"),
+          logo: enemy.getAttribute("src"),
         };
-      });
-    }
+      }
 
-    const social = [
-      ...document.querySelectorAll(".socialMediaButtons a"),
-    ].reduce((social, $element) => {
-      const link = $element.getAttribute("href");
+      function getCurrentForm() {
+        return [...document.querySelectorAll(".streak-ASdvuasdr123Gazx")]
+          .map((match) => ({
+            won: match.classList.contains("won"),
+          }))
+          .reverse();
+      }
 
-      const media = $element.querySelector("i").classList[2];
+      function getTrophies() {
+        return [...document.querySelectorAll("a.trophy")].map((link) => {
+          const trophy = link.querySelector(".trophyDescription");
+
+          const name = trophy.getAttribute("title");
+          const url = link.getAttribute("href");
+          const imageURL = trophy.querySelector("img").getAttribute("src");
+
+          const image = imageURL.startsWith("http")
+            ? imageURL
+            : "https://www.hltv.org" + imageURL;
+
+          return {
+            name,
+            url,
+            image,
+          };
+        });
+      }
+
+      const social = [
+        ...document.querySelectorAll(".socialMediaButtons a"),
+      ].reduce((social, $element) => {
+        const link = $element.getAttribute("href");
+
+        const media = $element.querySelector("i").classList[2];
+
+        return {
+          ...social,
+          [media]: link,
+        };
+      }, {});
+
+      const name = getElementText(".profile-team-name");
+
+      if (!name) {
+        return { notFound: true };
+      }
+
+      const country = getElementText(".team-country");
+      const stats = getTeamStats();
+      const players = getPlayers();
+      const nextMatch = getNextMatch();
+      const currentForm = getCurrentForm();
+      const trophies = getTrophies();
+      const logo = document.querySelector(".team-logo").getAttribute("src");
 
       return {
-        ...social,
-        [media]: link,
+        name,
+        logo,
+        social,
+        players,
+        trophies,
+        country,
+        next_match: nextMatch,
+        current_form: currentForm,
+        ...stats,
       };
-    }, {});
+    }, HLTV_URL);
 
-    const name = getElementText(".profile-team-name");
-
-    if (!name) {
-      return { notFound: true };
-    }
-
-    const country = getElementText(".team-country");
-    const stats = getTeamStats();
-    const players = getPlayers();
-    const nextMatch = getNextMatch();
-    const currentForm = getCurrentForm();
-    const trophies = getTrophies();
-    const logo = document.querySelector(".team-logo").getAttribute("src");
-
-    return {
-      name,
-      logo,
-      social,
-      players,
-      trophies,
-      country,
-      next_match: nextMatch,
-      current_form: currentForm,
-      ...stats,
-    };
-  }, HLTV_URL);
-
-  await page.close();
-
-  return info;
+    return info;
+  } finally {
+    await page.close().catch(() => {});
+  }
 }

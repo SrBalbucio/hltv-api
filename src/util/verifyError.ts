@@ -1,8 +1,8 @@
-import { Browser, Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 
 import { HLTVError } from '../error/HLTVError';
 
-export async function verifyError(page: Page, browser: Browser) {
+export async function verifyError(page: Page) {
   const error = await page.evaluate(() => {
     const errorElement = document.querySelector('.error-status');
 

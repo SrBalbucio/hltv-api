@@ -1,4 +1,6 @@
 import { Browser, launch, Page } from "puppeteer";
+import { exec } from "child_process";
+import { promisify } from "util";
 import path from "path";
 
 import { HLTVError } from "../error/HLTVError";
@@ -12,6 +14,8 @@ import {
   parseProxy,
   solveCloudflareChallenge,
 } from "../service/capsolver";
+
+const execAsync = promisify(exec);
 
 const headless = HEADLESS?.toLocaleLowerCase() === "true";
 
@@ -36,17 +40,60 @@ const USER_DATA_DIR = path.resolve("data", "chrome-profile");
 let browserSingleton: Browser | null = null;
 let launching: Promise<Browser> | null = null;
 
+/**
+ * Kills leftover Chromium processes bound to OUR profile (e.g. after a crash
+ * or an unclean process.exit, the child survives and keeps the profile lock).
+ * Matches only the profile path in the command line, so a user's own browser
+ * is never touched.
+ */
+async function killOrphanedBrowser() {
+  try {
+    if (process.platform === "win32") {
+      await execAsync(
+        `powershell -NoProfile -Command "Get-CimInstance Win32_Process | ` +
+          `Where-Object { $_.Name -eq 'chrome.exe' -and $_.CommandLine -like '*${USER_DATA_DIR}*' } | ` +
+          `ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"`
+      );
+    } else {
+      await execAsync(`pkill -f "user-data-dir=${USER_DATA_DIR}" || true`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+  } catch {
+    // nothing left to kill
+  }
+}
+
+async function launchBrowser(): Promise<Browser> {
+  try {
+    return await launch({
+      headless,
+      args: BROWSER_ARGS,
+      userDataDir: USER_DATA_DIR,
+    });
+  } catch (error: any) {
+    const locked = String(error?.message || "").includes("already running");
+    if (!locked) throw error;
+
+    console.error(
+      "[createPage] profile locked — killing orphaned browser and retrying"
+    );
+    await killOrphanedBrowser();
+
+    return launch({
+      headless,
+      args: BROWSER_ARGS,
+      userDataDir: USER_DATA_DIR,
+    });
+  }
+}
+
 function getBrowser(): Promise<Browser> {
   if (browserSingleton?.connected) {
     return Promise.resolve(browserSingleton);
   }
 
   if (!launching) {
-    launching = launch({
-      headless,
-      args: BROWSER_ARGS,
-      userDataDir: USER_DATA_DIR,
-    })
+    launching = launchBrowser()
       .then((browser) => {
         browserSingleton = browser;
         browser.on("disconnected", () => {
@@ -64,6 +111,15 @@ function getBrowser(): Promise<Browser> {
 
   return launching;
 }
+
+// Clean up the child on process exit so the profile lock is released.
+process.once("exit", () => {
+  try {
+    browserSingleton?.process()?.kill();
+  } catch {
+    // already gone
+  }
+});
 
 type CreatePageReturn = [Page, Browser];
 

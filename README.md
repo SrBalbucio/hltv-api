@@ -38,6 +38,26 @@
    pnpm start
    ```
 
+### 🗺️ Rotas
+
+Base URL: `http://localhost:8080/api/v1` (Swagger UI em `/api-docs`).
+
+| Rota | Descrição |
+|------|-----------|
+| `GET /match` | Partidas ao vivo + futuras: `{ live: MatchItem[], upcoming: MatchItem[] }`. Cada item traz `eventId`, `event`, placar do mapa atual (`team1Score`/`team2Score`), série (`team1SeriesScore`/`team2SeriesScore`), `currentMap`, `format`, `stars` e `date` (unix ms). Duplicadas (destaque/pinada vs agenda) são deduplicadas |
+| `GET /match/info/:matchId` | Detalhe da partida: times (logo, url, score, nacionalidade), data, veto/maps, evento |
+| `GET /match/score/:matchId` | Estado/placar da partida: status, times com série, mapas com half-scores |
+| `GET /match/results?offset=` | Partidas encerradas (mais recentes primeiro), `{ matches, pagination }` — `offset` em múltiplos de 100 |
+| `GET /event` | `{ ongoing: EventItem[], upcoming: (EventItem & { location, prizePool, teamsCount, big, banner })[] }`, com `startDate`/`endDate` ISO |
+| `GET /event/info/:eventId` | Detalhe do evento: status (`upcoming/live/finished`), datas ISO, prize pool, local, placements, times participantes (rank HLTV/VRS), eventos relacionados |
+| `GET /team/info/:teamId` · `GET /team/matches/:teamId` · `GET /team/search/:name` | Times |
+| `GET /player/info/:playerId` · `GET /player/search/:name` | Jogadores |
+| `GET /ranking/{year}/{month}/{day}[/{country}]` | Ranking |
+| `GET /search?query=` | Busca geral |
+| `GET /util/expire-all` | Limpa o cache |
+
+Documentação completa dos schemas no Swagger UI (`/api-docs`).
+
 ---
 
 ## ☁️ Cloudflare e modo headless

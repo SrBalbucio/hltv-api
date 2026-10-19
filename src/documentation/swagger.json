@@ -940,6 +940,11 @@
               },
               "big": {
                 "type": "boolean"
+              },
+              "banner": {
+                "type": "string",
+                "nullable": true,
+                "description": "Wide banner (big events only)"
               }
             }
           }
@@ -997,7 +1002,9 @@
             }
           },
           "format": {
-            "type": "string"
+            "type": "string",
+            "nullable": true,
+            "description": "boN, or null when the row shows the map name"
           },
           "map": {
             "type": "string",

@@ -17,66 +17,69 @@ interface Search {
 }
 
 export async function search(query: string) {
-  const [page, browser] = await createPage();
+  const [page] = await createPage();
 
-  await page.goto(`https://www.hltv.org/search?query=${query}`, {
-    waitUntil: "domcontentloaded",
-    timeout: 0,
-  });
+  try {
 
-  await assertNotChallenged(page);
+    await page.goto(`https://www.hltv.org/search?query=${query}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 0,
+    });
 
-  const searchFound = await page.evaluate((hltvURL) => {
-    const STATIC_IMAGE = "/img/static";
+    await assertNotChallenged(page);
 
-    const topics = [...document.querySelectorAll("table")];
+    const searchFound = await page.evaluate((hltvURL) => {
+      const STATIC_IMAGE = "/img/static";
 
-    return topics.reduce<Search>(
-      (search, topic) => {
-        const title = topic
-          .querySelector(".table-header")
-          .textContent.toLowerCase() + 's';
+      const topics = [...document.querySelectorAll("table")];
 
-        const rows = topic
-          .querySelector("tbody")
-          .querySelectorAll("tr td:not(.text-center) a");
+      return topics.reduce<Search>(
+        (search, topic) => {
+          const title = topic
+            .querySelector(".table-header")
+            .textContent.toLowerCase() + 's';
 
-        const value = [...rows].map((row) => {
-          const pattern = /\/\w+\/(\d+)\/(\w+)/;
+          const rows = topic
+            .querySelector("tbody")
+            .querySelectorAll("tr td:not(.text-center) a");
 
-          const url = row
-            .getAttribute("href")
-            .replace("/team", "/team/info")
-            .replace("/player", "/player/info")
-            .replace("/events", "/event/info");
+          const value = [...rows].map((row) => {
+            const pattern = /\/\w+\/(\d+)\/(\w+)/;
 
-          const [_, id, slug] = url.match(pattern) || [];
+            const url = row
+              .getAttribute("href")
+              .replace("/team", "/team/info")
+              .replace("/player", "/player/info")
+              .replace("/events", "/event/info");
 
-          const name = row.textContent;
-          const logo = row.querySelector("img")?.getAttribute("src") || "";
+            const [_, id, slug] = url.match(pattern) || [];
 
-          return {
-            url,
-            id,
-            slug,
-            name,
-            logo: logo.startsWith(STATIC_IMAGE) ? `${hltvURL}${logo}` : logo,
-          };
-        });
+            const name = row.textContent;
+            const logo = row.querySelector("img")?.getAttribute("src") || "";
 
-        if (search[title]) {
-          return { ...search, [title]: [...search[title], ...value] };
-        }
+            return {
+              url,
+              id,
+              slug,
+              name,
+              logo: logo.startsWith(STATIC_IMAGE) ? `${hltvURL}${logo}` : logo,
+            };
+          });
 
-        return { ...search };
-      },
-      { players: [], teams: [], articles: [], events: [] }
-    );
-  }, HLTV_URL);
+          if (search[title]) {
+            return { ...search, [title]: [...search[title], ...value] };
+          }
 
-  Object.keys(searchFound);
+          return { ...search };
+        },
+        { players: [], teams: [], articles: [], events: [] }
+      );
+    }, HLTV_URL);
 
-  await page.close();
+    Object.keys(searchFound);
 
-  return searchFound;
+    return searchFound;
+  } finally {
+    await page.close().catch(() => {});
+  }
 }

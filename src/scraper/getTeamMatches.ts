@@ -47,92 +47,95 @@ export async function getTeamMatches({
   actualPage = 1,
   ...options
 }: GetTeamMatchesOptions) {
-  const [page, browser] = await createPage();
+  const [page] = await createPage();
 
-  const offset = (actualPage - 1) * 100;
+  try {
 
-  const params = qs.stringify({ ...options, offset });
+    const offset = (actualPage - 1) * 100;
 
-  await page.goto(`https://www.hltv.org/results?${params}`, {
-    waitUntil: "domcontentloaded",
-    timeout: 0,
-  });
+    const params = qs.stringify({ ...options, offset });
 
-  await assertNotChallenged(page);
+    await page.goto(`https://www.hltv.org/results?${params}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 0,
+    });
 
-  const matches = await page.evaluate((page) => {
-    const selector =
-      page === 1 ? ".result-con:not(:first-child)" : ".result-con";
+    await assertNotChallenged(page);
 
-    return [...document.querySelectorAll(selector)].map((match) => {
-      const linkText = match.querySelector(".a-reset").getAttribute("href");
+    const matches = await page.evaluate((page) => {
+      const selector =
+        page === 1 ? ".result-con:not(:first-child)" : ".result-con";
 
-      const [, matchId] = linkText.match(/matches\/(\d+)\/\w+/) || [, ''];
+      return [...document.querySelectorAll(selector)].map((match) => {
+        const linkText = match.querySelector(".a-reset").getAttribute("href");
 
-      const link = `/match/info/${matchId}`;
+        const [, matchId] = linkText.match(/matches\/(\d+)\/\w+/) || [, ''];
 
-      const [team, enemy] = match.querySelectorAll(".team-cell");
+        const link = `/match/info/${matchId}`;
 
-      const mainTeam = team.querySelector(".team");
-      const enemyTeam = enemy.querySelector(".team");
+        const [team, enemy] = match.querySelectorAll(".team-cell");
 
-      const mainTeamWon = mainTeam.classList.contains("team-won");
+        const mainTeam = team.querySelector(".team");
+        const enemyTeam = enemy.querySelector(".team");
 
-      const [teamScore, enemyScore] =
-        match.querySelectorAll(".result-score span");
+        const mainTeamWon = mainTeam.classList.contains("team-won");
 
-      const event = match.querySelector(".event-logo");
-      const stars = match.querySelector(".stars");
+        const [teamScore, enemyScore] =
+          match.querySelectorAll(".result-score span");
 
-      const mapText = match.querySelector(".map-text").textContent;
+        const event = match.querySelector(".event-logo");
+        const stars = match.querySelector(".stars");
 
-      const bestOf = mapText.startsWith("bo") ? Number(mapText[2]) : 1;
+        const mapText = match.querySelector(".map-text").textContent;
+
+        const bestOf = mapText.startsWith("bo") ? Number(mapText[2]) : 1;
+
+        return {
+          link,
+          best_of: bestOf,
+          stars: stars?.children?.length || 0,
+
+          team: {
+            name: mainTeam.textContent,
+            logo: team.querySelector("img").getAttribute("src"),
+            score: Number(teamScore.textContent),
+            won: mainTeamWon,
+          },
+
+          enemy: {
+            name: enemyTeam.textContent,
+            logo: enemy.querySelector("img").getAttribute("src"),
+            score: Number(enemyScore.textContent),
+            won: !mainTeamWon,
+          },
+
+          event: {
+            title: event.getAttribute("title"),
+            src: event.getAttribute("src"),
+          },
+        };
+      });
+    }, actualPage);
+
+    const pagination = await page.evaluate(() => {
+      const paginationElement = document.querySelector(".pagination-data");
+
+      const [actual, max, total] = paginationElement
+        ? paginationElement.textContent
+            .match(/(\d+) - (\d+) of (\d+)/)
+            .splice(1)
+            .map(Number)
+        : [0, 0, 0];
 
       return {
-        link,
-        best_of: bestOf,
-        stars: stars?.children?.length || 0,
-
-        team: {
-          name: mainTeam.textContent,
-          logo: team.querySelector("img").getAttribute("src"),
-          score: Number(teamScore.textContent),
-          won: mainTeamWon,
-        },
-
-        enemy: {
-          name: enemyTeam.textContent,
-          logo: enemy.querySelector("img").getAttribute("src"),
-          score: Number(enemyScore.textContent),
-          won: !mainTeamWon,
-        },
-
-        event: {
-          title: event.getAttribute("title"),
-          src: event.getAttribute("src"),
-        },
+        actual,
+        max,
+        total,
       };
     });
-  }, actualPage);
 
-  const pagination = await page.evaluate(() => {
-    const paginationElement = document.querySelector(".pagination-data");
-
-    const [actual, max, total] = paginationElement
-      ? paginationElement.textContent
-          .match(/(\d+) - (\d+) of (\d+)/)
-          .splice(1)
-          .map(Number)
-      : [0, 0, 0];
-
-    return {
-      actual,
-      max,
-      total,
-    };
-  });
-
-  await page.close();
-
-  return { matches, pagination };
+    return { matches, pagination };
+  } finally {
+    await page.close().catch(() => {});
+  }
 }
