@@ -111,7 +111,7 @@ export async function getPlayerInfo(playerId: string) {
     };
   }, HLTV_URL);
 
-  await browser.close();
+  await page.close();
 
   return info;
 }

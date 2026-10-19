@@ -105,7 +105,7 @@ export async function getEvents() {
     return { ongoing, upcoming };
   });
 
-  await browser.close();
+  await page.close();
 
   return events;
 }

@@ -76,7 +76,7 @@ export async function search(query: string) {
 
   Object.keys(searchFound);
 
-  await browser.close();
+  await page.close();
 
   return searchFound;
 }

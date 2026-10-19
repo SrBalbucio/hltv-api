@@ -113,7 +113,7 @@ export async function getRankingInfo({
     });
   }, HLTV_URL);
 
-  await browser.close();
+  await page.close();
 
   return { teams, navigation };
 }

@@ -8,6 +8,9 @@ export async function getMatches() {
     timeout: 0,
   });
 
+  // Fail fast (or wait for clearance) before spending time on hydration.
+  await assertNotChallenged(page);
+
   // HLTV re-renders (pinned/live) wrappers client-side right after load;
   // wait until every match has its event headline populated, else fall through.
   await page
@@ -24,8 +27,6 @@ export async function getMatches() {
       { timeout: 15000 }
     )
     .catch(() => {});
-
-  await assertNotChallenged(page);
 
   const matches = await page.evaluate(() => {
     const matchWrappers = document.querySelectorAll(".match-wrapper");
@@ -160,7 +161,7 @@ export async function getMatches() {
     };
   });
 
-  await browser.close();
+  await page.close();
 
   return matches;
 }

@@ -17,7 +17,7 @@ export async function getEventInfo(id: string) {
   });
 
   if (has500Error) {
-    await browser.close();
+    await page.close();
     throw new HLTVError(404, "Not Found Event");
   }
 
@@ -131,7 +131,7 @@ export async function getEventInfo(id: string) {
     HLTV_URL
   );
 
-  await browser.close();
+  await page.close();
 
   return { id, ...event };
 }

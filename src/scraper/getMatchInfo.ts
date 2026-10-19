@@ -117,7 +117,7 @@ export async function getMatchInfo(id: string) {
     };
   }, HLTV_URL);
 
-  await browser.close();
+  await page.close();
 
   return match;
 }

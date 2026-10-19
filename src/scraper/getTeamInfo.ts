@@ -155,7 +155,7 @@ export async function getTeamInfo(teamId: string) {
     };
   }, HLTV_URL);
 
-  await browser.close();
+  await page.close();
 
   return info;
 }

@@ -132,7 +132,7 @@ export async function getTeamMatches({
     };
   });
 
-  await browser.close();
+  await page.close();
 
   return { matches, pagination };
 }

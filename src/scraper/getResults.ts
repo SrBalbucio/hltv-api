@@ -112,7 +112,7 @@ export async function getResults(offset = 0) {
     return { matches, pagination: { actual, max, total } };
   });
 
-  await browser.close();
+  await page.close();
 
   return result;
 }

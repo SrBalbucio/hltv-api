@@ -15,7 +15,7 @@ export async function getMatchScore(id: string) {
   });
 
   if (has500Error) {
-    await browser.close();
+    await page.close();
     throw new HLTVError(404, 'Not Found Match');
   }
 
@@ -173,7 +173,7 @@ export async function getMatchScore(id: string) {
     };
   }, HLTV_URL);
 
-  await browser.close();
+  await page.close();
 
   return score;
 }
