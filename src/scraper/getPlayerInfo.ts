@@ -1,5 +1,5 @@
 import { HLTV_URL } from ".";
-import { createPage } from "../util/createPage";
+import { assertNotChallenged, createPage } from "../util/createPage";
 
 export async function getPlayerInfo(playerId: string) {
   const [page, browser] = await createPage();
@@ -8,6 +8,8 @@ export async function getPlayerInfo(playerId: string) {
     waitUntil: "domcontentloaded",
     timeout: 0,
   });
+
+  await assertNotChallenged(page);
 
   const info = await page.evaluate((hltvURL) => {
     function formatImage(image: string) {

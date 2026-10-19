@@ -9,7 +9,7 @@ export async function handleRoute(
     await callback();
   } catch (error) {
     if (error instanceof HLTVError) {
-      res.status(error.status).json({ error });
+      return res.status(error.status).json({ error });
     }
 
     res.status(500).json({

@@ -1,5 +1,5 @@
 import { HLTV_URL } from ".";
-import { createPage } from "../util/createPage";
+import { assertNotChallenged, createPage } from "../util/createPage";
 import { verifyError } from "../util/verifyError";
 
 interface GetRankingInfoOptions {
@@ -25,6 +25,8 @@ export async function getRankingInfo({
     waitUntil: "domcontentloaded",
     timeout: 0,
   });
+
+  await assertNotChallenged(page);
 
   await verifyError(page, browser);
 

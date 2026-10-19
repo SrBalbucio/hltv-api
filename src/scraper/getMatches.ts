@@ -1,4 +1,4 @@
-import { createPage } from "../util/createPage";
+import { assertNotChallenged, createPage } from "../util/createPage";
 
 export async function getMatches() {
   const [page, browser] = await createPage();
@@ -25,10 +25,11 @@ export async function getMatches() {
     )
     .catch(() => {});
 
+  await assertNotChallenged(page);
+
   const matches = await page.evaluate(() => {
     const matchWrappers = document.querySelectorAll(".match-wrapper");
-    const live: any[] = [];
-    const upcoming: any[] = [];
+    const matches: any[] = [];
 
     matchWrappers.forEach((wrapper) => {
       const matchId = wrapper.getAttribute("data-match-id") || "";
@@ -49,6 +50,10 @@ export async function getMatches() {
       const team2 = getTeamName(1, "team2");
 
       const eventEl = wrapper.querySelector(".match-event");
+      const eventId =
+        wrapper.getAttribute("data-event-id") ||
+        eventEl?.getAttribute("data-event-id") ||
+        "";
       let eventInfo = eventEl?.getAttribute("data-event-headline") || "";
       if (!eventInfo && eventEl) {
         eventInfo = eventEl.textContent?.replace(/\s+/g, ' ').trim() || "";
@@ -122,20 +127,37 @@ export async function getMatches() {
         team1SeriesScore,
         team2SeriesScore,
         currentMap,
+        eventId,
         event: eventInfo,
         format,
         stars,
         date: dateUnix ? parseInt(dateUnix, 10) : null
       };
 
-      if (isLive) {
-        live.push(matchData);
-      } else {
-        upcoming.push(matchData);
+      matches.push(matchData);
+    });
+
+    // The same match can appear more than once (featured/pinned section +
+    // day agenda). Keep the entry with the most populated fields.
+    const howComplete = (m: any) =>
+      (m.event ? 1 : 0) +
+      (m.team1 !== "TBD" ? 1 : 0) +
+      (m.team2 !== "TBD" ? 1 : 0) +
+      (m.date ? 1 : 0);
+
+    const byId = new Map<string, any>();
+    matches.forEach((m) => {
+      const current = byId.get(m.id);
+      if (!current || howComplete(m) > howComplete(current)) {
+        byId.set(m.id, m);
       }
     });
 
-    return { live, upcoming };
+    const unique = [...byId.values()];
+    return {
+      live: unique.filter((m) => m.live),
+      upcoming: unique.filter((m) => !m.live),
+    };
   });
 
   await browser.close();

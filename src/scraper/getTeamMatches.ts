@@ -1,6 +1,6 @@
 import qs from "query-string";
 
-import { createPage } from "../util/createPage";
+import { assertNotChallenged, createPage } from "../util/createPage";
 
 type Maps =
   | "de_cache"
@@ -57,6 +57,8 @@ export async function getTeamMatches({
     waitUntil: "domcontentloaded",
     timeout: 0,
   });
+
+  await assertNotChallenged(page);
 
   const matches = await page.evaluate((page) => {
     const selector =

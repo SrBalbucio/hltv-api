@@ -34,6 +34,18 @@ router.get('/score/:matchId', async (req, res) => {
   });
 });
 
+router.get('/results', async (req, res) => {
+  const offset = Number(req.query.offset) || 0;
+
+  cacheRoute({
+    res,
+    key: `results:${offset}`,
+    field: "match/results",
+    expire: 5 * 60,
+    fetchData: async () => Scraper.getResults(offset),
+  });
+});
+
 router.get('/', async (req, res) => {
   cacheRoute({
     res,

@@ -1,6 +1,6 @@
 import { HLTV_URL } from ".";
 
-import { createPage } from "../util/createPage";
+import { assertNotChallenged, createPage } from "../util/createPage";
 
 export async function getTeamInfo(teamId: string) {
   const [page, browser] = await createPage();
@@ -9,6 +9,8 @@ export async function getTeamInfo(teamId: string) {
     waitUntil: "domcontentloaded",
     timeout: 0,
   });
+
+  await assertNotChallenged(page);
 
   const info = await page.evaluate((hltvURL) => {
     const mappers = {

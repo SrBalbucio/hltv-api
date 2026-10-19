@@ -292,6 +292,44 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "HLTV is behind a Cloudflare challenge; retry later (nothing is cached)"
+          }
+        }
+      }
+    },
+    "/match/results": {
+      "get": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Get finished match results (most recent first)",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Pagination offset (multiples of 100)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Results"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "HLTV is behind a Cloudflare challenge; retry later (nothing is cached)"
           }
         }
       }
@@ -301,20 +339,56 @@
         "tags": [
           "Events"
         ],
-        "summary": "Get ongoing events",
+        "summary": "Get ongoing and upcoming events",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventItem"
-                  }
+                  "$ref": "#/components/schemas/Events"
                 }
               }
             }
+          },
+          "503": {
+            "description": "HLTV is behind a Cloudflare challenge; retry later (nothing is cached)"
+          }
+        }
+      }
+    },
+    "/event/info/{eventId}": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Get event details (dates, prize pool, teams, placements)",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found"
+          },
+          "503": {
+            "description": "HLTV is behind a Cloudflare challenge; retry later (nothing is cached)"
           }
         }
       }
@@ -758,6 +832,9 @@
           "link": {
             "type": "string"
           },
+          "scoreLink": {
+            "type": "string"
+          },
           "live": {
             "type": "boolean"
           },
@@ -766,6 +843,34 @@
           },
           "team2": {
             "type": "string"
+          },
+          "team1Score": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Score on the current map (live only)"
+          },
+          "team2Score": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Score on the current map (live only)"
+          },
+          "team1SeriesScore": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Maps won in the series (live only)"
+          },
+          "team2SeriesScore": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Maps won in the series (live only)"
+          },
+          "currentMap": {
+            "type": "string",
+            "nullable": true
+          },
+          "eventId": {
+            "type": "string",
+            "description": "HLTV event id, usable on /event/info/{eventId}"
           },
           "event": {
             "type": "string"
@@ -795,10 +900,285 @@
             "type": "string"
           },
           "date": {
+            "type": "string",
+            "description": "Raw HLTV date text (e.g. 'Oct 14th - Oct 27th')"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "logo": {
+            "type": "string"
+          }
+        }
+      },
+      "UpcomingEventItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventItem"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "location": {
+                "type": "string",
+                "nullable": true
+              },
+              "prizePool": {
+                "type": "string",
+                "nullable": true
+              },
+              "teamsCount": {
+                "type": "integer",
+                "nullable": true
+              },
+              "big": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "Events": {
+        "type": "object",
+        "properties": {
+          "ongoing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventItem"
+            }
+          },
+          "upcoming": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpcomingEventItem"
+            }
+          }
+        }
+      },
+      "ResultItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "scoreLink": {
+            "type": "string"
+          },
+          "date": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Unix timestamp in milliseconds"
+          },
+          "team1": {
+            "$ref": "#/components/schemas/ResultTeam"
+          },
+          "team2": {
+            "$ref": "#/components/schemas/ResultTeam"
+          },
+          "event": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "logo": {
+                "type": "string"
+              }
+            }
+          },
+          "format": {
+            "type": "string"
+          },
+          "map": {
+            "type": "string",
+            "nullable": true
+          },
+          "stars": {
+            "type": "integer"
+          }
+        }
+      },
+      "ResultTeam": {
+        "type": "object",
+        "properties": {
+          "name": {
             "type": "string"
           },
           "logo": {
             "type": "string"
+          },
+          "score": {
+            "type": "integer",
+            "nullable": true
+          },
+          "won": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Results": {
+        "type": "object",
+        "properties": {
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultItem"
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "actual": {
+                "type": "integer"
+              },
+              "max": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "EventInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "banner": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "upcoming",
+              "live",
+              "finished"
+            ]
+          },
+          "date": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "prizePool": {
+            "type": "string"
+          },
+          "teamsCount": {
+            "type": "string"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "flag": {
+                "type": "string"
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "properties": {
+              "results": {
+                "type": "string",
+                "nullable": true
+              },
+              "stats": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "placements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "team": {
+                  "type": "string"
+                },
+                "teamUrl": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "position": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "prize": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "logo": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "logo": {
+                  "type": "string"
+                },
+                "worldRank": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "vrsRank": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "relatedEvents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }

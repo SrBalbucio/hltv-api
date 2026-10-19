@@ -7,6 +7,8 @@ import { getRankingInfo } from './getRankingInfo';
 import { search } from './search';
 import { getMatches } from './getMatches';
 import { getEvents } from './getEvents';
+import { getEventInfo } from './getEventInfo';
+import { getResults } from './getResults';
 
 export const HLTV_URL = 'https://www.hltv.org';
 export const TEAM_PLACEHOLDER_IMAGE = 'https://www.hltv.org/img/static/team/placeholder.svg';
@@ -22,6 +24,8 @@ export const Scraper = {
   getPlayerInfo,
   getMatches,
   getEvents,
+  getEventInfo,
+  getResults,
   TEAM_PLACEHOLDER_IMAGE,
   PLAYER_PLACEHOLDER_IMAGE,
 };

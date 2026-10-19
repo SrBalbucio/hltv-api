@@ -1,6 +1,6 @@
 import { HLTV_URL } from ".";
 import { HLTVError } from '../error/HLTVError';
-import { createPage } from "../util/createPage";
+import { assertNotChallenged, createPage } from "../util/createPage";
 
 export async function getMatchInfo(id: string) {
   const [page, browser] = await createPage();

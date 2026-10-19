@@ -1,5 +1,5 @@
 import { HLTV_URL } from ".";
-import { createPage } from "../util/createPage";
+import { assertNotChallenged, createPage } from "../util/createPage";
 
 interface Topic {
   url: string;
@@ -23,6 +23,8 @@ export async function search(query: string) {
     waitUntil: "domcontentloaded",
     timeout: 0,
   });
+
+  await assertNotChallenged(page);
 
   const searchFound = await page.evaluate((hltvURL) => {
     const STATIC_IMAGE = "/img/static";
