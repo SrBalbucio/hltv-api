@@ -38,6 +38,21 @@
    pnpm start
    ```
 
+### 🐳 Docker
+
+Sobe API + Redis de uma vez (a API escuta na `API_PORT`, padrão `8080`):
+
+```sh
+docker compose up -d --build
+```
+
+- **Multi-stage** sobre `node:22-bookworm-slim`, rodando como usuário `node` com o
+  **Chrome for Testing** baixado pelo próprio puppeteer (mesmo build validado contra o
+  Cloudflare — nada de Chromium de distro).
+- `HEADLESS=true` já é o padrão no container; o perfil do Chromium persiste no volume
+  `chrome-profile`, então o token de passagem sobrevive a restarts.
+- Redis acessível dentro da rede como `REDIS_URL=redis://redis:6379`.
+
 ### 🗺️ Rotas
 
 Base URL: `http://localhost:8080/api/v1` (Swagger UI em `/api-docs`).
