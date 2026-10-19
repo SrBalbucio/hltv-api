@@ -51,7 +51,7 @@ export async function getEventInfo(id: string) {
       const placements = [
         ...document.querySelectorAll(".placements .placement"),
       ].map((p) => ({
-        team: clean(p.querySelector(".team a")?.textContent),
+        team: clean(p.querySelector(".team a")?.textContent) || null,
         teamUrl: p.querySelector(".team a")?.getAttribute("href") || null,
         position:
           [...p.children]
@@ -60,7 +60,7 @@ export async function getEventInfo(id: string) {
         prize: clean(p.querySelector(".prize")?.textContent) || null,
         logo: formatImage(
           p.querySelector(".team-logo img")?.getAttribute("src")
-        ),
+        ) || null,
       }));
 
       const teams = [
@@ -87,7 +87,9 @@ export async function getEventInfo(id: string) {
           "",
       }));
 
-      const prizePoolEl = document.querySelector(".prizepool");
+      // td holds the value; the th headline shares the .prizepool class
+      const prizePoolEl = document.querySelector("td.prizepool");
+      const teamsCountEl = document.querySelector("td.teamsNumber");
 
       return {
         name:
@@ -104,7 +106,7 @@ export async function getEventInfo(id: string) {
         ),
         prizePool:
           prizePoolEl?.getAttribute("title") || clean(prizePoolEl?.textContent),
-        teamsCount: clean(document.querySelector(".teamsNumber")?.textContent),
+        teamsCount: clean(teamsCountEl?.textContent),
         location: {
           name: clean(
             document.querySelector(".location .text-ellipsis")?.textContent

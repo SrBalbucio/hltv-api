@@ -51,10 +51,10 @@ A HLTV fica atrás do Cloudflare. Para tornar o scraping viável:
   `CF_CHALLENGE_WAIT_MS` (padrão 30s) pelo auto-pass do Cloudflare — ou pela resolução
   manual na janela do browser quando `HEADLESS=false`. Depois disso responde **503**
   (nunca feed vazio com 200) e serve a última cópia boa do cache com o header `X-Stale: true`.
-- **Use `HEADLESS=false`**: testes empíricos mostraram que o headless do Chromium é
-  desafiado por fingerprint mesmo com token válido no perfil — já o browser headed
-  auto-passa (janela de ~10-50s) e as chamadas seguintes saem em ~10s sem desafio.
-  Em servidor Linux sem display, execute sob `xvfb-run` com `HEADLESS=false`.
+- **Puppeteer 25 / Chrome atual**: com o Chrome em versão corrente (modo `--headless=new`),
+  o fingerprint headless deixou de ser desafiado — `HEADLESS=true` funciona direto.
+  Se algum path voltar a ser desafiado no seu IP, rode `HEADLESS=false` (local ou sob
+  `xvfb-run` em Linux) que o desafio auto-passa na janela de espera.
 - **Instância única**: o browser é compartilhado pelo processo — não rode duas instâncias
   da API apontando para o mesmo `data/chrome-profile` (lock de perfil).
 

@@ -23,7 +23,7 @@ let browserSingleton: Browser | null = null;
 let launching: Promise<Browser> | null = null;
 
 function getBrowser(): Promise<Browser> {
-  if (browserSingleton?.isConnected()) {
+  if (browserSingleton?.connected) {
     return Promise.resolve(browserSingleton);
   }
 
@@ -62,11 +62,10 @@ export async function createPage(): Promise<CreatePageReturn> {
   const browser = await getBrowser();
   const page = await browser.newPage();
 
-  // Fixed UA in both modes: cf_clearance is bound to the user agent, so
-  // mixing UAs would invalidate a clearance solved in the other mode.
-  await page.setUserAgent(
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36"
-  );
+  // Keep the UA consistent with the real engine and identical between
+  // modes: CF tokens are UA-bound, and "HeadlessChrome" is an instant flag.
+  const nativeUa = await page.evaluate(() => navigator.userAgent);
+  await page.setUserAgent(nativeUa.replace("HeadlessChrome", "Chrome"));
 
   await page.setRequestInterception(true);
 
