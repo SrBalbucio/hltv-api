@@ -2,14 +2,28 @@ import { Browser, launch, Page } from "puppeteer";
 import path from "path";
 
 import { HLTVError } from "../error/HLTVError";
-import { CF_CHALLENGE_WAIT_MS, HEADLESS } from "../service/env";
+import {
+  CF_CHALLENGE_WAIT_MS,
+  CAPSOLVER_PROXY,
+  HEADLESS,
+} from "../service/env";
+import {
+  capsolverEnabled,
+  parseProxy,
+  solveCloudflareChallenge,
+} from "../service/capsolver";
 
 const headless = HEADLESS?.toLocaleLowerCase() === "true";
+
+const proxyConfig = parseProxy(CAPSOLVER_PROXY);
 
 const BROWSER_ARGS = [
   "--disable-blink-features=AutomationControlled",
   "--no-sandbox",
   "--disable-dev-shm-usage",
+  // CapSolver's clearance is bound to the solving IP: when configured, all
+  // traffic must exit through the same proxy the challenge is solved from.
+  ...(proxyConfig ? [`--proxy-server=${proxyConfig.server}`] : []),
 ];
 
 /**
@@ -67,6 +81,16 @@ export async function createPage(): Promise<CreatePageReturn> {
   const nativeUa = await page.evaluate(() => navigator.userAgent);
   await page.setUserAgent(nativeUa.replace("HeadlessChrome", "Chrome"));
 
+  if (proxyConfig?.username) {
+    // HTTP proxies only; socks5 proxies do not support 401 authentication.
+    await page
+      .authenticate({
+        username: proxyConfig.username,
+        password: proxyConfig.password || "",
+      })
+      .catch(() => {});
+  }
+
   await page.setRequestInterception(true);
 
   page.on("request", (request) => {
@@ -101,10 +125,12 @@ const challenged = (page: Page) =>
 
 /**
  * Fails with 503 when Cloudflare served its "Just a moment..." challenge.
- * Before failing, waits up to CF_CHALLENGE_WAIT_MS for the challenge to
- * clear — Cloudflare auto-passes sometimes, and in headed mode a human can
- * solve it in the window. Once solved, the page is reloaded with the fresh
- * clearance cookie (persisted in the shared profile).
+ * Recovery order (cheapest first):
+ *   1. passive wait — Cloudflare auto-passes sometimes, and in headed mode
+ *      a human can solve it in the window;
+ *   2. CapSolver solve (only when CAPSOLVER_API_KEY + CAPSOLVER_PROXY are
+ *      set) — injects the returned cf_clearance into the persistent profile;
+ * if nothing works, throws 503 (never an empty feed).
  */
 export async function assertNotChallenged(page: Page) {
   if (!(await challenged(page))) {
@@ -128,6 +154,41 @@ export async function assertNotChallenged(page: Page) {
 
     if (!(await challenged(page))) {
       return;
+    }
+  }
+
+  if (capsolverEnabled()) {
+    const websiteURL = page.url();
+    const html = await page.content().catch(() => undefined);
+    const userAgent = await page
+      .evaluate(() => navigator.userAgent)
+      .catch(() => undefined);
+
+    const clearance = await solveCloudflareChallenge(
+      websiteURL,
+      html,
+      userAgent || ""
+    );
+
+    if (clearance) {
+      await page
+        .setCookie({
+          name: "cf_clearance",
+          value: clearance,
+          domain: ".hltv.org",
+          path: "/",
+          secure: true,
+          httpOnly: true,
+        })
+        .catch(() => {});
+
+      await page
+        .reload({ waitUntil: "domcontentloaded", timeout: 60000 })
+        .catch(() => {});
+
+      if (!(await challenged(page))) {
+        return;
+      }
     }
   }
 

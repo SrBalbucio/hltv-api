@@ -57,6 +57,12 @@ A HLTV fica atrás do Cloudflare. Para tornar o scraping viável:
   `xvfb-run` em Linux) que o desafio auto-passa na janela de espera.
 - **Instância única**: o browser é compartilhado pelo processo — não rode duas instâncias
   da API apontando para o mesmo `data/chrome-profile` (lock de perfil).
+- **CapSolver (opcional)**: válvula de escape paga para quando o desafio resiste à espera
+  passiva. Ative com `CAPSOLVER_API_KEY` + `CAPSOLVER_PROXY` (proxy **estático/sticky** —
+  o `cf_clearance` devolvido fica atado ao IP do solve, então o browser também passa a
+  sair por esse proxy). Sem as variáveis, nada muda: a espera passiva e o 503+stale
+  seguem como padrão, e o solve só acontece depois dela falhar (single-flight, 1 solve
+  pago por ~10 min no máximo).
 
 ## ❤️ Agradecimentos  
 
