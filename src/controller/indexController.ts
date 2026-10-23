@@ -26,7 +26,7 @@ router.get("/search", (req, res) => {
   });
 });
 
-router.get("/ranking/:year/:month/:day/:country?", (req, res) => {
+router.get("/ranking/:year/:month/:day{/:country}", (req, res) => {
   const options = req.params;
 
   const key = JSON.stringify(options);

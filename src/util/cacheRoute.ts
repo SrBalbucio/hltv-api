@@ -25,7 +25,7 @@ export async function cacheRoute({
 }: HandleRouteParams) {
   const valueFound = await redisClient.hGet(key, field);
 
-  if (valueFound) {
+  if (typeof valueFound === "string") {
     return res.json(JSON.parse(valueFound));
   }
 
