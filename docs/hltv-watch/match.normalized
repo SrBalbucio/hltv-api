@@ -1,0 +1,16 @@
+# page: match
+.teamsBox .team found=yes
+  #0 <div.team><img.team1[alt,src,title]></img><div.team1-gradient><a[href]><img.day-only.logo[alt,height,src,srcset,title,width]>~</img><img.logo.night-only[alt,height,src,srcset,title,width]>~</img><div.teamName>~</div></a><div.won></div></div></div>
+  #1 <div.team><img.team2[alt,src,title]></img><div.team2-gradient><a[href]><img.day-only.logo[alt,height,src,srcset,title,width]>~</img><img.logo.night-only[alt,height,src,srcset,title,width]>~</img><div.teamName>~</div></a><div.lost></div></div></div>
+.teamName found=yes
+  #0 <div.teamName></div>
+  #1 <div.teamName></div>
+.mapholder found=yes
+  #0 <div.mapholder><div.played><div.map-name-holder><img.minimap[alt,height,src,title,width]>~</img><div.mapname>~</div></div></div><div.played.results><div.lost.results-left><div.results-teamlogo-container>~</div><div.results-teamname-container.text-ellipsis>~</div></div><div.results-center><div.results-center-stats>~</div><div.results-center-half-score>~</div></div><span.pick.results-right.won><div.results-teamlogo-container>~</div><div.results-teamname-container.text-ellipsis>~</div></span></div></div>
+  #1 <div.mapholder><div.played><div.map-name-holder><img.minimap[alt,height,src,title,width]>~</img><div.mapname>~</div></div></div><div.played.results><div.pick.results-left.won><div.results-teamlogo-container>~</div><div.results-teamname-container.text-ellipsis>~</div></div><div.results-center><div.results-center-stats>~</div><div.results-center-half-score>~</div></div><span.lost.results-right><div.results-teamlogo-container>~</div><div.results-teamname-container.text-ellipsis>~</div></span></div></div>
+.veto-box found=yes
+  #0 <div.standard-box.veto-box><div.padding.preformatted-text></div></div>
+  #1 <div.standard-box.veto-box><div.padding><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>
+a.results-stats found=yes
+  #0 <a.results-stats[href]></a>
+  #1 <a.results-stats[href]></a>

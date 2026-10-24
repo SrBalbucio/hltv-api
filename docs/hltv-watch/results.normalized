@@ -1,0 +1,16 @@
+# page: results
+.result-con[data-zonedgrouping-entry-unix] found=yes
+  #0 <div.result-con[data-zonedgrouping-entry-unix]><a.a-reset[href]><div.result><table>~</table></div></a></div>
+  #1 <div.result-con[data-zonedgrouping-entry-unix]><a.a-reset[href]><div.result><table>~</table></div></a></div>
+a.a-reset found=yes
+  #0 <a.a-reset[href]><div.result><table><tbody>~</tbody></table></div></a>
+  #1 <a.a-reset[href]><div.result><table><tbody>~</tbody></table></div></a>
+.team-cell found=yes
+  #0 <td.team-cell><div.line-align.team1><div.team.team-won></div><img.team-logo[alt,src,title]></img></div></td>
+  #1 <td.team-cell><div.line-align.team2><img.day-only.team-logo[alt,src,title]></img><img.night-only.team-logo[alt,src,title]></img><div.team></div></div></td>
+.result-score found=yes
+  #0 <td.result-score><span.score-won></span><span.score-lost></span></td>
+  #1 <td.result-score><span.score-lost></span><span.score-won></span></td>
+.pagination-data found=yes
+  #0 <span.pagination-data></span>
+  #1 <span.pagination-data></span>

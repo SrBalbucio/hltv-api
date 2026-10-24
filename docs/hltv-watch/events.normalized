@@ -1,0 +1,10 @@
+# page: events
+.ongoing-event found=yes
+  #0 <a.a-reset.ongoing-event[href]><div.content.standard-box><img.day-only.logo[alt,src,srcset,title]></img><img.logo.night-only[alt,src,srcset,title]></img><div.table-holder><table.table>~</table></div></div></a>
+  #1 <div.no-height.ongoing-event></div>
+.event-status-upcoming-headline + .events-holder a.big-event found=yes
+  #0 <a.a-reset.big-event.standard-box[href]><div.event-holder><img.event-header[src]></img></div><div.big-event-info><div.info><div.big-event-name>~</div><div.location-top-teams>~</div></div><div.additional-info><table.table>~</table></div></div></a>
+  #1 <a.a-reset.big-event.standard-box[href]><div.event-holder><img.event-header[src]></img></div><div.big-event-info><div.info><div.big-event-name>~</div><div.location-top-teams>~</div></div><div.additional-info><table.table>~</table></div></div></a>
+.event-status-upcoming-headline + .events-holder a.small-event found=yes
+  #0 <a.a-reset.small-event.standard-box[href]><div.event-logo-container><img.logo[alt,src,srcset,title]></img></div><div.table-holder><table.table><tbody>~</tbody></table></div></a>
+  #1 <a.a-reset.small-event.standard-box[href]><div.event-logo-container><img.day-only.logo[alt,src,srcset,title]></img><img.logo.night-only[alt,src,srcset,title]></img></div><div.table-holder><table.table><tbody>~</tbody></table></div></a>

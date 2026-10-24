@@ -1,0 +1,17 @@
+# page: ranking
+.ranked-team found=yes
+  #0 <div.ranked-team.standard-box><div.bg-holder><div.ranking-header><span.position.wide-position>~</span><span.team-logo>~</span><div.relative>~</div><span.filler>~</span><div.change.neutral>~</div></div><div.lineup-con><table.lineup>~</table><div.more>~</div></div></div></div>
+  #1 <div.ranked-team.standard-box><div.bg-holder><div.ranking-header><span.position.wide-position>~</span><span.team-logo>~</span><div.relative>~</div><span.filler>~</span><div.change.neutral>~</div></div><div.hidden.lineup-con><table.lineup>~</table><div.more>~</div></div></div></div>
+.position found=yes
+  #0 <span.position.wide-position></span>
+  #1 <span.position.wide-position></span>
+.name found=yes
+  #0 <span.name></span>
+  #1 <span.name></span>
+.points found=yes
+  #0 <span.points><span.gtSmartphone-only></span></span>
+  #1 <span.points><span.gtSmartphone-only></span></span>
+a.pagination-prev found=yes
+  #0 <a.pagination-prev[href]><i.fa.fa-chevron-left.pagination-left[aria-hidden]></i></a>
+a.pagination-next found=yes
+  #0 <a.pagination-next[href]><i.fa.fa-chevron-right.pagination-right[aria-hidden]></i></a>

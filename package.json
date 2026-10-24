@@ -4,10 +4,11 @@
   "license": "MIT",
   "scripts": {
     "dev": "docker-compose up -d && cross-env HEADLESS=false tsx watch --clear-screen=false ./src/index.ts",
-    "dev:on": "cross-env HEADLESS=true tsx watch --clear-screen=false ./src/index.ts",
+    "dev:on": "cross-env HEADLESS=false tsx watch --clear-screen=false ./src/index.ts",
     "build": "tsc",
     "start": "cross-env HEADLESS=true node build/index.js",
-    "time": "cross-env HEADLESS=false tsx ./src/time.ts"
+    "time": "cross-env HEADLESS=false tsx ./src/time.ts",
+    "watch:hltv": "cross-env HEADLESS=true tsx ./scripts/watch-hltv-pages.ts"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

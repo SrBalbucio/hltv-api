@@ -1,0 +1,9 @@
+# page: team
+.profile-team-name found=yes
+  #0 <h1.profile-team-name.text-ellipsis></h1>
+.profile-team-stat found=yes
+  #0 <div.profile-team-stat><img[alt,height,loading,src,width]></img><div.regional-wrapper><b><span.regional-name-full>~</span><span.regional-name-short>~</span></b></div><span.right><a[href]></a><a.regional-rank[href,title]><span.region-eu.regional-rank-region>~</span></a></span></div>
+  #1 <div.profile-team-stat><img.day-only[alt,height,loading,src,width]></img><img.night-only[alt,height,loading,src,width]></img><b></b><span.right><a[href]></a><a.regional-rank[href,title]><img.flag.regional-rank-flag[alt,src,title]>~</img></a></span></div>
+.bodyshot-team-bg a found=yes
+  #0 <a.col-custom[href,title]><div.overlayImageFrame><div.role-pills><span.role-pill.role-pill--igl[title]>~</span></div><img.bodyshot-team-img[alt,src,title]></img><div.nickname-container.text-ellipsis><div.playerFlagName>~</div></div></div></a>
+  #1 <a.col-custom[href,title]><div.overlayImageFrame><img.bodyshot-team-img[alt,src,title]></img><div.nickname-container.text-ellipsis><div.playerFlagName>~</div></div></div></a>

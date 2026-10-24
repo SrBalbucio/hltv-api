@@ -1,0 +1,13 @@
+# page: matches
+.match-wrapper[data-match-id] found=yes
+  #0 <div.live-match-container.match-wrapper[data-event-id,data-eventtype,data-match-id,data-match-wrapper,data-pinned,data-region,data-stars,lan,live,team1,team2]><div.match[data-livescore-match]><div.match><a.a-reset.match-top.plausible-event-name=Matches+click+live+match.with-stars[href]>~</a><div.match-bottom>~</div></div></div><div.scorebot-container[id]></div></div>
+  #1 <div.live-match-container.match-wrapper[data-event-id,data-eventtype,data-match-id,data-match-wrapper,data-pinned,data-region,data-stars,lan,live,team1,team2]><div.match[data-livescore-match]><div.match><a.a-reset.match-top.plausible-event-name=Matches+click+live+match.with-stars[href]>~</a><div.match-bottom>~</div></div></div><div.scorebot-container[id]></div></div>
+.match-teamname found=yes
+  #0 <div.match-teamname.text-ellipsis></div>
+  #1 <div.match-teamname.text-ellipsis></div>
+.match-event[data-event-headline] found=yes
+  #0 <div.match-event.text-ellipsis[data-event-headline,data-event-id]><div.match-event-logo-container><img.day-only.match-event-logo[alt,height,src,title,width]></img><img.match-event-logo.night-only[alt,height,src,title,width]></img></div><div.text-ellipsis></div><div.match-pre-playoff.match-stage.matches-chronologically-hide></div></div>
+  #1 <div.match-event.text-ellipsis[data-event-headline,data-event-id]><div.match-event-logo-container><img.day-only.match-event-logo[alt,height,src,title,width]></img><img.match-event-logo.night-only[alt,height,src,title,width]></img></div><div.text-ellipsis></div><div.match-pre-playoff.match-stage.matches-chronologically-hide></div></div>
+.match-time[data-unix] found=yes
+  #0 <div.match-time[data-time-format,data-unix]></div>
+  #1 <div.match-time[data-time-format,data-unix]></div>

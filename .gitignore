@@ -1,8 +1,10 @@
 build/
 node_modules/
+target/
 *.local
 .env
 data
 /data
 ./*.html
 *.log
+.commandcode

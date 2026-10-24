@@ -1,0 +1,10 @@
+# page: search
+table found=yes
+  #0 <table.table><tbody><tr><td.table-header>~</td></tr><tr><td>~</td></tr><tr><td>~</td></tr></tbody></table>
+  #1 <table.table><tbody><tr><td.table-header>~</td></tr><tr><td>~</td></tr><tr><td>~</td></tr></tbody></table>
+.table-header found=yes
+  #0 <td.table-header></td>
+  #1 <td.table-header></td>
+tbody tr td a found=yes
+  #0 <a[data-result-id,data-result-position,data-result-type,href]><img.flag[alt,src,title]></img></a>
+  #1 <a[data-result-id,data-result-position,data-result-type,href]><img.flag[alt,src,title]></img></a>

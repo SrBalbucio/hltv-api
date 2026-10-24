@@ -1,0 +1,7 @@
+# page: player
+h1.playerNickname found=yes
+  #0 <h1.playerNickname[itemprop]></h1>
+div.playerRealname found=yes
+  #0 <div.playerRealname[itemprop]></div>
+.playerTeam found=yes
+  #0 <div.playerInfoRow.playerTeam[itemprop,itemscope,itemtype]><span.listLeft><span.gtSmartphone-only[itemprop]></span><span.smartphone-only></span><span></span></span><span.listRight.text-ellipsis[itemprop,itemscope,itemtype]><img[alt,src,title]></img><span><a[href,itemprop]>~</a><span>~</span></span></span></div>
