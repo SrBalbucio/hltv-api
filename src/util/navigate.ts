@@ -6,11 +6,13 @@ import { assertNotChallenged } from "./createPage";
 import { verifyError } from "./verifyError";
 
 export async function gotoHLTV(page: Page, url: string): Promise<void> {
+  const startedAt = Date.now();
   try {
     await page.goto(url, {
       waitUntil: "domcontentloaded",
       timeout: NAV_TIMEOUT_MS,
     });
+    console.log(`[scrape] goto ok ${url} ${Date.now() - startedAt}ms -> ${page.url()}`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (/timeout|timed out|net::|navigation/i.test(message)) {

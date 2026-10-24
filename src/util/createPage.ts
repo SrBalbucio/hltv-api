@@ -64,6 +64,7 @@ async function killOrphanedBrowser() {
 }
 
 async function launchBrowser(): Promise<Browser> {
+  console.log(`[browser] launching (headless=${headless}, profile=${USER_DATA_DIR})`);
   try {
     return await launch({
       headless,
@@ -96,7 +97,9 @@ function getBrowser(): Promise<Browser> {
     launching = launchBrowser()
       .then((browser) => {
         browserSingleton = browser;
+        console.log(`[browser] launched and connected`);
         browser.on("disconnected", () => {
+          console.log(`[browser] disconnected`);
           if (browserSingleton === browser) {
             browserSingleton = null;
           }

@@ -147,7 +147,10 @@ export function solveCloudflareChallenge(
   html: string | undefined,
   userAgent: string
 ): Promise<string | null> {
-  if (!capsolverEnabled()) return Promise.resolve(null);
+  if (!capsolverEnabled()) {
+    console.log(`[capsolver] disabled, skipping solve for ${websiteURL}`);
+    return Promise.resolve(null);
+  }
 
   if (Date.now() - lastSolvedAt < SOLVE_REUSE_MS && !inflightSolve) {
     // Recently solved — the cookie should still be valid in the profile.
@@ -155,9 +158,11 @@ export function solveCloudflareChallenge(
   }
 
   if (!inflightSolve) {
+    console.log(`[capsolver] solving challenge for ${websiteURL}`);
     inflightSolve = doSolve(websiteURL, html, userAgent)
       .then((clearance) => {
         if (clearance) lastSolvedAt = Date.now();
+        console.log(`[capsolver] solve ${clearance ? "ok" : "empty"} for ${websiteURL}`);
         return clearance;
       })
       .catch((error) => {

@@ -36,7 +36,9 @@ export async function cacheRoute({
 
   if (typeof valueFound === "string") {
     try {
-      return res.json(JSON.parse(valueFound));
+      const parsed = JSON.parse(valueFound);
+      console.log(`[cache] hit key=${key} field=${field}`);
+      return res.json(parsed);
     } catch (error) {
       console.error(
         `[cache] corrupted cache key=${key} field=${field}, evicting: ${(error as Error)?.message || error}`
@@ -48,8 +50,11 @@ export async function cacheRoute({
   }
 
   handleRoute(async () => {
+    console.log(`[cache] miss key=${key} field=${field} -> scraping`);
+    const scrapeStartedAt = Date.now();
     try {
       const value = await fetchData();
+      console.log(`[cache] scrape ok key=${key} field=${field} ${Date.now() - scrapeStartedAt}ms`);
 
       if (value.notCache) {
         return res.status(value.status).send();
@@ -74,6 +79,7 @@ export async function cacheRoute({
 
       res.json(value);
     } catch (error) {
+      console.error(`[cache] scrape fail key=${key} field=${field} ${Date.now() - scrapeStartedAt}ms: ${(error as Error)?.message || error}`);
       let stale: unknown = null;
       try {
         stale = await redisClient.get(staleKey(key, field));
@@ -85,6 +91,7 @@ export async function cacheRoute({
 
       if (typeof stale === "string" && stale) {
         try {
+          console.log(`[cache] stale hit key=${key} field=${field} (X-Stale)`);
           return res.set("X-Stale", "true").json(JSON.parse(stale));
         } catch (parseError) {
           console.error(
