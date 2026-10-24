@@ -9,7 +9,7 @@ router.get('/expire-all', (req, res) => {
   handleRoute(async () => {
     const keys = await expireAll();
     res.json({ keys });
-  }, res)
+  }, res, req)
 });
 
 export default router;

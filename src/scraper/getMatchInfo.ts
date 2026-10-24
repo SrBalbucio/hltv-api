@@ -1,41 +1,40 @@
 import { HLTV_URL } from ".";
-import { HLTVError } from '../error/HLTVError';
-import { assertNotChallenged, createPage } from "../util/createPage";
+import { createPage } from "../util/createPage";
+import { gotoHLTV, throwIfHltvErrorBackground, throwIfLayoutMissing } from "../util/navigate";
 
 export async function getMatchInfo(id: string) {
   const [page] = await createPage();
 
   try {
 
-    await page.goto(`${HLTV_URL}/matches/${id}/match`, {
-      timeout: 0,
-      waitUntil: "domcontentloaded",
-    });
+    await gotoHLTV(page, `${HLTV_URL}/matches/${id}/match`);
 
-    const has500Error = await page.evaluate(() => {
-      return Boolean(document.querySelector('.error-background'));
-    });
+    await throwIfHltvErrorBackground(page, "Match");
 
-    if (has500Error) {
-      throw new HLTVError(404, 'Not Found Match');
-    }
+    await throwIfLayoutMissing(
+      page,
+      [".teamsBox .team", ".time[data-unix]", ".event a"],
+      "match-info"
+    );
 
     const match = await page.evaluate((hltvURL) => {
-      function getElementDateString(element: Element) {
+      function getElementDateString(element: Element | null) {
+        if (!element) return null;
         return new Date(
           Number(element.getAttribute("data-unix"))
         ).toLocaleString();
       }
 
-      function formatImage(image: string) {
+      function formatImage(image: string | null | undefined) {
+        if (!image) return "";
         return image.startsWith("/img/static") ? `${hltvURL}${image}` : image;
       }
 
       function getImageAttr(selector: string, parent: Element) {
         const element = parent.querySelector(selector);
 
-        const title = element.getAttribute("title");
-        const src = formatImage(element.getAttribute("src"));
+        const title = element?.getAttribute("title") || "";
+        const src = formatImage(element?.getAttribute("src"));
 
         return {
           title,
@@ -50,12 +49,12 @@ export async function getMatchInfo(id: string) {
       const countdownElement = document.querySelector(".countdown");
 
       const matchOver =
-        countdownElement.textContent.toLowerCase() === "match over";
+        (countdownElement?.textContent || "").toLowerCase() === "match over";
 
       const eventElement = document.querySelector(".event a");
 
       const picksLog = [...document.querySelectorAll(".veto-box")].map((x) =>
-        x.textContent
+        (x.textContent || "")
           .trim()
           .split("\n")
           .map((y) => y.trim())
@@ -75,10 +74,9 @@ export async function getMatchInfo(id: string) {
 
       const teams = [...document.querySelectorAll(".teamsBox .team")].map(
         (element) => {
-          const url = element
+          const url = (element
             .querySelector("a")
-            .getAttribute("href")
-            .replace("/team", "/team/info");
+            ?.getAttribute("href") || "").replace("/team", "/team/info");
 
           const nationalityAttr = getImageAttr("img", element);
           const imageAttr = getImageAttr("a img", element);
@@ -109,8 +107,8 @@ export async function getMatchInfo(id: string) {
         date,
         match_over: matchOver,
         event: {
-          name: eventElement.getAttribute("title"),
-          link: eventElement.getAttribute("href"),
+          name: eventElement?.getAttribute("title") || "",
+          link: eventElement?.getAttribute("href") || "",
         },
         picks: {
           logs: picksLog,

@@ -1,26 +1,21 @@
 import { HLTV_URL } from ".";
-import { HLTVError } from "../error/HLTVError";
-import { assertNotChallenged, createPage } from "../util/createPage";
+import { createPage } from "../util/createPage";
+import { gotoHLTV, throwIfHltvErrorBackground, throwIfLayoutMissing } from "../util/navigate";
 
 export async function getEventInfo(id: string) {
   const [page] = await createPage();
 
   try {
 
-    await page.goto(`${HLTV_URL}/events/${id}/-`, {
-      timeout: 0,
-      waitUntil: "domcontentloaded",
-    });
+    await gotoHLTV(page, `${HLTV_URL}/events/${id}/-`);
 
-    await assertNotChallenged(page);
+    await throwIfHltvErrorBackground(page, "Event");
 
-    const has500Error = await page.evaluate(() => {
-      return Boolean(document.querySelector(".error-background"));
-    });
-
-    if (has500Error) {
-      throw new HLTVError(404, "Not Found Event");
-    }
+    await throwIfLayoutMissing(
+      page,
+      [".event-hub-title", ".eventdate span[data-unix]", "td.prizepool"],
+      "event-info"
+    );
 
     const event = await page.evaluate(
       (hltvURL) => {

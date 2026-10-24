@@ -10,6 +10,7 @@ router.get('/info/:eventId', async (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key: String(eventId).toLowerCase(),
     field: "event/info",
     fetchData: async () => Scraper.getEventInfo(eventId),
@@ -19,6 +20,7 @@ router.get('/info/:eventId', async (req, res) => {
 router.get('/', async (req, res) => {
   cacheRoute({
     res,
+    req,
     key: "events",
     field: "events/list",
     fetchData: async () => Scraper.getEvents(),

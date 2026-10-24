@@ -16,6 +16,7 @@ router.get("/search", (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key,
     field: "search",
     fetchData: async () => {
@@ -33,6 +34,7 @@ router.get("/ranking/:year/:month/:day{/:country}", (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key,
     field: "ranking",
     fetchData: async () => {

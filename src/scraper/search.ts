@@ -1,5 +1,6 @@
 import { HLTV_URL } from ".";
-import { assertNotChallenged, createPage } from "../util/createPage";
+import { createPage } from "../util/createPage";
+import { gotoHLTV } from "../util/navigate";
 
 interface Topic {
   url: string;
@@ -21,12 +22,7 @@ export async function search(query: string) {
 
   try {
 
-    await page.goto(`https://www.hltv.org/search?query=${query}`, {
-      waitUntil: "domcontentloaded",
-      timeout: 0,
-    });
-
-    await assertNotChallenged(page);
+    await gotoHLTV(page, `https://www.hltv.org/search?query=${query}`);
 
     const searchFound = await page.evaluate((hltvURL) => {
       const STATIC_IMAGE = "/img/static";

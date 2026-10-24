@@ -1,16 +1,22 @@
-import { assertNotChallenged, createPage } from "../util/createPage";
+import { createPage } from "../util/createPage";
+import { gotoHLTV, throwIfLayoutMissing } from "../util/navigate";
 
 export async function getEvents() {
   const [page] = await createPage();
 
   try {
 
-    await page.goto("https://www.hltv.org/events", {
-      waitUntil: "domcontentloaded",
-      timeout: 0,
-    });
+    await gotoHLTV(page, "https://www.hltv.org/events");
 
-    await assertNotChallenged(page);
+    await throwIfLayoutMissing(
+      page,
+      [
+        ".ongoing-event",
+        ".event-status-upcoming-headline + .events-holder a.big-event",
+        ".event-status-upcoming-headline + .events-holder a.small-event",
+      ],
+      "events"
+    );
 
     const events = await page.evaluate(() => {
       const toIso = (unix: string | null | undefined) =>

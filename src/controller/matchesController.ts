@@ -14,6 +14,7 @@ router.get('/info/:matchId', async (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key,
     field: "match/info",
     fetchData: async () => Scraper.getMatchInfo(matchId),
@@ -27,6 +28,7 @@ router.get('/score/:matchId', async (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key,
     field: "match/score",
     expire: ROUND_CACHE_TTL,
@@ -39,6 +41,7 @@ router.get('/results', async (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key: `results:${offset}`,
     field: "match/results",
     expire: 5 * 60,
@@ -49,6 +52,7 @@ router.get('/results', async (req, res) => {
 router.get('/', async (req, res) => {
   cacheRoute({
     res,
+    req,
     key: "matches",
     field: "matches/list",
     expire: ROUND_CACHE_TTL,

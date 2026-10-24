@@ -12,6 +12,7 @@ router.get("/search/:playerName", async (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key,
     field: "player/search",
     fetchData: async () => {
@@ -29,6 +30,7 @@ router.get("/info/:playerId", async (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key,
     field: "player/info",
     fetchData: async () => Scraper.getPlayerInfo(playerId),

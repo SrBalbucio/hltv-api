@@ -1,17 +1,14 @@
-import { assertNotChallenged, createPage } from "../util/createPage";
+import { createPage } from "../util/createPage";
+import { gotoHLTV, throwIfLayoutMissing } from "../util/navigate";
 
 export async function getMatches() {
   const [page] = await createPage();
 
   try {
 
-    await page.goto("https://www.hltv.org/matches", {
-      waitUntil: "domcontentloaded",
-      timeout: 0,
-    });
+    await gotoHLTV(page, "https://www.hltv.org/matches");
 
-    // Fail fast (or wait for clearance) before spending time on hydration.
-    await assertNotChallenged(page);
+    await throwIfLayoutMissing(page, [".match-wrapper"], "matches");
 
     // HLTV re-renders (pinned/live) wrappers client-side right after load;
     // wait until every match has its event headline populated, else fall through.

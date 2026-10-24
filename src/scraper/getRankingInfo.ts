@@ -1,6 +1,6 @@
 import { HLTV_URL } from ".";
-import { assertNotChallenged, createPage } from "../util/createPage";
-import { verifyError } from "../util/verifyError";
+import { createPage } from "../util/createPage";
+import { gotoHLTV } from "../util/navigate";
 
 interface GetRankingInfoOptions {
   day: string | number;
@@ -23,14 +23,7 @@ export async function getRankingInfo({
       country && country !== "undefined" ? `/country/${country}` : ""
     }`;
 
-    await page.goto(`https://www.hltv.org/ranking/teams/${path}`, {
-      waitUntil: "domcontentloaded",
-      timeout: 0,
-    });
-
-    await assertNotChallenged(page);
-
-    await verifyError(page);
+    await gotoHLTV(page, `https://www.hltv.org/ranking/teams/${path}`);
 
     const navigation = await page.evaluate(() => {
       function getNavigation(prevSelector: string, nextSelector: string) {

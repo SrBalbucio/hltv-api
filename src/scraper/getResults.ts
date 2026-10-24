@@ -1,17 +1,19 @@
 import { HLTV_URL } from ".";
-import { assertNotChallenged, createPage } from "../util/createPage";
+import { createPage } from "../util/createPage";
+import { gotoHLTV, throwIfLayoutMissing } from "../util/navigate";
 
 export async function getResults(offset = 0) {
   const [page] = await createPage();
 
   try {
 
-    await page.goto(`${HLTV_URL}/results?content=recency&offset=${offset}`, {
-      waitUntil: "domcontentloaded",
-      timeout: 0,
-    });
+    await gotoHLTV(page, `${HLTV_URL}/results?content=recency&offset=${offset}`);
 
-    await assertNotChallenged(page);
+    await throwIfLayoutMissing(
+      page,
+      [".result-con", "a.a-reset", ".result-score"],
+      "results"
+    );
 
     const result = await page.evaluate(() => {
       const clean = (text: string | null | undefined) =>

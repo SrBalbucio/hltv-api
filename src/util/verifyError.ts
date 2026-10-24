@@ -10,13 +10,13 @@ export async function verifyError(page: Page) {
       return null;
     }
 
-    const status = Number(errorElement.querySelector('h1').textContent);
-    const message = errorElement.querySelector('.error-desc').textContent;
+    const status = Number(errorElement.querySelector('h1')?.textContent || 0) || 500;
+    const message = errorElement.querySelector('.error-desc')?.textContent?.trim() || 'HLTV error page';
 
     return { status, message };
   });
 
   if (error) {
-    throw new HLTVError(error.status, error.message);
+    throw new HLTVError(error.status, error.message, 'UPSTREAM_HLTV_ERROR');
   }
 }

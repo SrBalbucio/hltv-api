@@ -1,10 +1,11 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 
 import { redisClient } from "../service/redis";
 import { handleRoute } from "./handleRoute";
 
 interface HandleRouteParams {
   res: Response<any, Record<string, any>>;
+  req?: Request;
 
   expire?: number;
   key: string;
@@ -18,15 +19,32 @@ const staleKey = (key: string, field: string) => `stale:${key}:${field}`;
 
 export async function cacheRoute({
   res,
+  req,
   key,
   field,
   fetchData,
   expire = 60 * 60, // one hour
 }: HandleRouteParams) {
-  const valueFound = await redisClient.hGet(key, field);
+  let valueFound: unknown = null;
+  try {
+    valueFound = await redisClient.hGet(key, field);
+  } catch (error) {
+    console.error(
+      `[cache] hGet failed key=${key} field=${field} ${(error as Error)?.message || error}`
+    );
+  }
 
   if (typeof valueFound === "string") {
-    return res.json(JSON.parse(valueFound));
+    try {
+      return res.json(JSON.parse(valueFound));
+    } catch (error) {
+      console.error(
+        `[cache] corrupted cache key=${key} field=${field}, evicting: ${(error as Error)?.message || error}`
+      );
+      try {
+        await redisClient.hDel(key, field);
+      } catch {}
+    }
   }
 
   handleRoute(async () => {
@@ -37,28 +55,45 @@ export async function cacheRoute({
         return res.status(value.status).send();
       }
 
-      await redisClient.hSet(key, field, JSON.stringify(value));
+      try {
+        await redisClient.hSet(key, field, JSON.stringify(value));
 
-      await redisClient.expire(key, expire)
+        await redisClient.expire(key, expire)
 
-      // Last-known-good copy, served when the scraper fails (e.g. HLTV
-      // behind a Cloudflare challenge) so consumers keep degrading
-      // gracefully instead of losing the feed.
-      await redisClient.set(staleKey(key, field), JSON.stringify(value), {
-        EX: STALE_EXPIRE_SECONDS,
-      });
+        // Last-known-good copy, served when the scraper fails (e.g. HLTV
+        // behind a Cloudflare challenge) so consumers keep degrading
+        // gracefully instead of losing the feed.
+        await redisClient.set(staleKey(key, field), JSON.stringify(value), {
+          EX: STALE_EXPIRE_SECONDS,
+        });
+      } catch (error) {
+        console.error(
+          `[cache] hSet failed key=${key} field=${field} ${(error as Error)?.message || error}`
+        );
+      }
 
       res.json(value);
     } catch (error) {
-      const stale = await redisClient
-        .get(staleKey(key, field))
-        .catch(() => null);
+      let stale: unknown = null;
+      try {
+        stale = await redisClient.get(staleKey(key, field));
+      } catch (staleError) {
+        console.error(
+          `[cache] stale get failed key=${key} field=${field} ${(staleError as Error)?.message || staleError}`
+        );
+      }
 
-      if (stale) {
-        return res.set("X-Stale", "true").json(JSON.parse(stale));
+      if (typeof stale === "string" && stale) {
+        try {
+          return res.set("X-Stale", "true").json(JSON.parse(stale));
+        } catch (parseError) {
+          console.error(
+            `[cache] corrupted stale key=${key} field=${field}: ${(parseError as Error)?.message || parseError}`
+          );
+        }
       }
 
       throw error;
     }
-  }, res);
+  }, res, req);
 }

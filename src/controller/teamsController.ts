@@ -13,6 +13,7 @@ router.get("/search/:teamName", async (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key,
     field: "team/search",
     fetchData: async () => {
@@ -28,6 +29,7 @@ router.get("/info/:teamId", async (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key: teamId.toLowerCase(),
     field: "team/info",
     fetchData: async () => {
@@ -51,6 +53,7 @@ router.get("/matches/:teamId", async (req, res) => {
 
   cacheRoute({
     res,
+    req,
     key,
     field: "team/matches",
 

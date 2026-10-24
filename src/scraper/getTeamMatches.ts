@@ -1,6 +1,7 @@
 import qs from "query-string";
 
-import { assertNotChallenged, createPage } from "../util/createPage";
+import { createPage } from "../util/createPage";
+import { gotoHLTV } from "../util/navigate";
 
 type Maps =
   | "de_cache"
@@ -55,12 +56,7 @@ export async function getTeamMatches({
 
     const params = qs.stringify({ ...options, offset });
 
-    await page.goto(`https://www.hltv.org/results?${params}`, {
-      waitUntil: "domcontentloaded",
-      timeout: 0,
-    });
-
-    await assertNotChallenged(page);
+    await gotoHLTV(page, `https://www.hltv.org/results?${params}`);
 
     const matches = await page.evaluate((page) => {
       const selector =

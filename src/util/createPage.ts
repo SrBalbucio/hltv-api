@@ -132,6 +132,8 @@ export async function createPage(): Promise<CreatePageReturn> {
   const browser = await getBrowser();
   const page = await browser.newPage();
 
+  await shimDevNameHelper(page);
+
   // Keep the UA consistent with the real engine and identical between
   // modes: CF tokens are UA-bound, and "HeadlessChrome" is an instant flag.
   const nativeUa = await page.evaluate(() => navigator.userAgent);
@@ -164,6 +166,22 @@ export async function createPage(): Promise<CreatePageReturn> {
   return [page, browser];
 }
 
+/**
+ * tsx/esbuild transpiles named closures like `const f = (x) => ...` into
+ * `__name((x) => ..., "f")`, a dev-only helper that does not exist in the
+ * browser. Every `page.evaluate` carrying such a closure would throw
+ * `ReferenceError: __name is not defined` and surface as a 500. This stub
+ * restores the helper's runtime contract (returns the function) for every
+ * document loaded in our pages; production builds (tsc) never emit it.
+ */
+async function shimDevNameHelper(page: Page): Promise<void> {
+  await page
+    .evaluateOnNewDocument(() => {
+      (globalThis as unknown as { __name?: unknown }).__name = (fn: unknown) => fn;
+    })
+    .catch(() => {});
+}
+
 const challenged = (page: Page) =>
   page
     .evaluate(() => {
@@ -192,6 +210,13 @@ export async function assertNotChallenged(page: Page) {
   if (!(await challenged(page))) {
     return;
   }
+
+  const url = page.url();
+  let title = "";
+  try {
+    title = await page.title();
+  } catch {}
+  console.error(`[challenge] detected url=${url} title=${JSON.stringify(title)} waiting up to ${CF_CHALLENGE_WAIT_MS}ms (capsolver=${capsolverEnabled()})`);
 
   const deadline = Date.now() + CF_CHALLENGE_WAIT_MS;
 
@@ -250,6 +275,7 @@ export async function assertNotChallenged(page: Page) {
 
   throw new HLTVError(
     503,
-    "HLTV is behind a Cloudflare challenge right now. Try again later."
+    "HLTV is behind a Cloudflare challenge right now. Try again later.",
+    "CLOUDFLARE_CHALLENGE"
   );
 }

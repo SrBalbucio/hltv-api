@@ -1,17 +1,13 @@
 import { HLTV_URL } from ".";
-import { assertNotChallenged, createPage } from "../util/createPage";
+import { createPage } from "../util/createPage";
+import { gotoHLTV } from "../util/navigate";
 
 export async function getPlayerInfo(playerId: string) {
   const [page] = await createPage();
 
   try {
 
-    await page.goto(`https://www.hltv.org/player/${playerId}/player`, {
-      waitUntil: "domcontentloaded",
-      timeout: 0,
-    });
-
-    await assertNotChallenged(page);
+    await gotoHLTV(page, `https://www.hltv.org/player/${playerId}/player`);
 
     const info = await page.evaluate((hltvURL) => {
       function formatImage(image: string) {

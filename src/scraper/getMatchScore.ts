@@ -1,24 +1,21 @@
 import { HLTV_URL } from ".";
-import { HLTVError } from '../error/HLTVError';
-import { assertNotChallenged, createPage } from "../util/createPage";
+import { createPage } from "../util/createPage";
+import { gotoHLTV, throwIfHltvErrorBackground, throwIfLayoutMissing } from "../util/navigate";
 
 export async function getMatchScore(id: string) {
   const [page] = await createPage();
 
   try {
 
-    await page.goto(`${HLTV_URL}/matches/${id}/match`, {
-      timeout: 0,
-      waitUntil: "domcontentloaded",
-    });
+    await gotoHLTV(page, `${HLTV_URL}/matches/${id}/match`);
 
-    const has500Error = await page.evaluate(() => {
-      return Boolean(document.querySelector('.error-background'));
-    });
+    await throwIfHltvErrorBackground(page, "Match");
 
-    if (has500Error) {
-      throw new HLTVError(404, 'Not Found Match');
-    }
+    await throwIfLayoutMissing(
+      page,
+      [".teamsBox .team", ".mapholder", ".event a"],
+      "match-score"
+    );
 
     const score = await page.evaluate((hltvURL) => {
       function formatImage(image: string) {
